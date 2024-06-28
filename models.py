@@ -29,7 +29,7 @@ class PostModel (_database.Base):
     post_description = _sqlalchemy.Column(_sqlalchemy.String , index = True)
     image = _sqlalchemy.column(_sqlalchemy.String)
     created_at = _sqlalchemy.Column(_sqlalchemy.DateTime, default=datetime.datetime.now)
-    user = _orm.relationship("User", back_populates="posts")
+    user = _orm.relationship("UserModel", back_populates="posts")
 
 
 
