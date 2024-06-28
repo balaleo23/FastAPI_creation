@@ -1,5 +1,11 @@
 import database as _database
 import models as _models
+import sqlalchemy.orm as _orm
+import schemas as _schemas
+import email_validator as _email_validator
+import fastapi as _fastapi
+import passlib.hash as _hash
+
 
 
 def create_db():
@@ -13,6 +19,40 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+async def getUserByEmail(email : str , db : _orm.session):
+    return db.query(_models.UserModel).filter_by(_models.UserModel.email ==email).first()
+
+
+async def create_user(user : _schemas.UserRequest , db : _orm.session):
+
+    try:
+        is_valid = _email_validator.validate_email(email=user.email)
+        email = is_valid.email
+
+    except _email_validator.EmailNotValidError:
+        _fastapi.HTTPException(status_code=400, detail="Provide Email Id in proper format")
+
+    # convert normal password to hashed password
+    hashed_password = _hash.bcrypt.hash(user.password)
+    #create the usermodel to save
+    user_object = _models.UserModel(
+        email = email,
+        name = user.name,
+        phone = user.phone,
+        password_hash = hashed_password
+
+    )
+
+    db.add(user_object)
+    db.commit()
+    db.refresh(user_object)
+    return user_object
+
+        
+
+
 
 
 create_db()
