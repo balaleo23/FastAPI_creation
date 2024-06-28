@@ -1,0 +1,1 @@
+FastAPI creation with Sqlite
