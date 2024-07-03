@@ -21,5 +21,21 @@ async def register_user(user: _schemas.UserRequest ,db : _orm.Session = _fastapi
     return await _services.create_token(user=db_user)
 
 
+@app.post("/api/v1/login")
+async def login(
+    form_data : _security.OAuth2PasswordRequestForm = _fastapi.Depends(),
+    db : _orm.Session = _fastapi.Depends(_services.get_db)
+):
+    db_user = await _services.login(form_data.username, form_data.password, db)
+
+    #if invalid user name and password
+    if not db_user:
+        raise _fastapi.HTTPException(status_code=401, detail="Invalid Email or Password")
+
+    #once the login is succe create the token
+    return await _services.create_token(user=db_user)
 
  
+@app.get("/api/v1/current_user", response_model=_schemas.UserResponse)
+async def get_current_user(user: _schemas.UserResponse = _fastapi.Depends(_services.current_user)):
+    return user

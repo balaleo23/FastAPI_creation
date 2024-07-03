@@ -6,9 +6,10 @@ import email_validator as _email_validator
 import fastapi as _fastapi
 import passlib.hash as _hash
 import jwt as _jwt
+import fastapi.security as _security
 
 _JWT_SECRET = "myjwtsecret"
-
+oauth2schema = _security.OAuth2PasswordBearer("api/v1/login")
 
 def create_db():
     return _database.Base.metadata.create_all(bind= _database.engine)
@@ -31,10 +32,6 @@ async def create_token(user: _models.UserModel):
     token = _jwt.encode(user_dict, _JWT_SECRET)
     return dict(access_token =token , token_type = "bearer")
 
-
-
-
-    pass
 
 async def getUserByEmail(email : str , db : _orm.session):
     return db.query(_models.UserModel).filter(_models.UserModel.email == email).first()
@@ -66,7 +63,31 @@ async def create_user(user : _schemas.UserRequest , db : _orm.session):
     db.refresh(user_object)
     return user_object
 
-        
+async def login(email : str , password : str , db : _orm.session):
+    
+    
+    db_user = await getUserByEmail(email=email, db=db)
+    #if user email is not found
+    if not db_user:
+        return False
+
+    #if user password is not found    
+    if not db_user.password_verfication(password= password):
+        return False
+    
+    return db_user
+
+async def current_user (db: _orm.session = _fastapi.Depends(get_db) , 
+                        token :str = _fastapi.Depends(oauth2schema)):    
+    try:
+        payload = _jwt.decode(token, _JWT_SECRET,  algorithms=["HS256"])  
+        #get user by id from payload (id and phone is already available in userpayload in token)
+        db_user = db.query(_models.UserModel).filter(_models.UserModel.id == payload["id"]).first()
+    except:
+        raise _fastapi.HTTPException(status_code=401, detail="Invalid Credentials")
+
+    #if everything okay return dto version of the user
+    return _schemas.UserResponse.from_orm(db_user)  
 
 
 

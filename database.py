@@ -3,7 +3,7 @@ import sqlalchemy.ext.declarative as _declarative
 import sqlalchemy.orm as _orm
 
 
-db_url = "sqlite:///dbfile.db"
+db_url = "sqlite:///backup/dbfile.db"
 
 engine = _sqlalchemy.create_engine(db_url, connect_args={"check_same_thread":False},  echo=True)
 
