@@ -73,6 +73,5 @@ async def create_post(post_request: _schemas.PostRequest,
     except Exception as e:
         logging.error(f"Database error: {str(e)}")
         return JSONResponse(status_code=500, content={"message": "Database error"})
-        logging.error(f"Error creating post: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+   
         
