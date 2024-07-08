@@ -28,15 +28,21 @@ class PostBase(_pydantic.BaseModel):
     post_description: str
     image: str
 
+    class Config:
+           from_attributes = True
 
 
 class PostRequest(PostBase):
     pass
 
+    class Config:
+        from_attributes = True
+        
 class PostResponse(PostBase):
     id: int
-    user_id: int
+    userid: int
     created_at: _datetime.datetime
+    
 
     class config:
         from_attributes = True

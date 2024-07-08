@@ -7,6 +7,10 @@ import fastapi as _fastapi
 import passlib.hash as _hash
 import jwt as _jwt
 import fastapi.security as _security
+from fastapi.exceptions import RequestValidationError
+from sqlalchemy.exc import SQLAlchemyError
+from fastapi import HTTPException
+
 
 _JWT_SECRET = "myjwtsecret"
 oauth2schema = _security.OAuth2PasswordBearer("api/v1/login")
@@ -91,5 +95,24 @@ async def current_user (db: _orm.session = _fastapi.Depends(get_db) ,
 
 
 
+
+async def create_post(user : _schemas.UserRequest , db : _orm.session,
+                      post : _schemas.PostRequest):
+    try:
+
+        post = _models.PostModel(
+            **post.dict(),userid = user.id
+        )
+
+        db.add(post)
+        db.commit()
+        db.refresh(post)
+
+        #convert the post model to Post DTO/Schemas and return to API layer
+        return _schemas.PostResponse.from_orm(post)
+
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Database error occurred while creating the post.")
 
 create_db()

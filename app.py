@@ -5,8 +5,32 @@ import sqlalchemy.orm as _orm
 import database as _database
 import schemas as _schemas
 import services as _services
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+import logging
+from fastapi.middleware.cors import CORSMiddleware
+
+origins = [
+    "http://localhost",  # Allow local development
+    "http://localhost:8000",  # Allow local server
+    # Add other origins as needed
+]
+
+
+
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
 
 app = _fastapi.FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post("/api/v1/users")
 async def register_user(user: _schemas.UserRequest ,db : _orm.Session = _fastapi.Depends(_services.get_db)):
@@ -39,3 +63,16 @@ async def login(
 @app.get("/api/v1/current_user", response_model=_schemas.UserResponse)
 async def get_current_user(user: _schemas.UserResponse = _fastapi.Depends(_services.current_user)):
     return user
+
+@app.post("/api/v1/posts", response_model=_schemas.PostResponse)
+async def create_post(post_request: _schemas.PostRequest, 
+                      user: _schemas.UserResponse = _fastapi.Depends(_services.current_user), 
+                      db : _orm.Session = _fastapi.Depends(_services.get_db)):
+    try:
+        return await _services.create_post(user=user, db=db, post=post_request)
+    except Exception as e:
+        logging.error(f"Database error: {str(e)}")
+        return JSONResponse(status_code=500, content={"message": "Database error"})
+        logging.error(f"Error creating post: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+        
