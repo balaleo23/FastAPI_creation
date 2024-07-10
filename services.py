@@ -37,6 +37,9 @@ async def create_token(user: _models.UserModel):
     return dict(access_token =token , token_type = "bearer")
 
 
+create_db()
+
+
 async def getUserByEmail(email : str , db : _orm.session):
     return db.query(_models.UserModel).filter(_models.UserModel.email == email).first()
     # return db.query(_models.UserModel).filter_by(_models.UserModel.email ==email).first()
@@ -115,4 +118,16 @@ async def create_post(user : _schemas.UserRequest , db : _orm.session,
         db.rollback()
         raise HTTPException(status_code=500, detail="Database error occurred while creating the post.")
 
-create_db()
+
+async def get_posts_by_user(user: _schemas.UserResponse, db: _orm.session):
+    try:
+        posts = db.query(_models.PostModel).filter_by(userid=user.id).all()
+        # convert each post model to post schema and make a list to be returned
+        return list(map(_schemas.PostResponse.from_orm, posts))
+    except SQLAlchemyError as e:
+        print(f" error in services: {str(e)}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Database error occurred while retriving the post.")
+
+
+

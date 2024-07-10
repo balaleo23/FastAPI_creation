@@ -26,7 +26,7 @@ class UserResponse(UserBase):
 class PostBase(_pydantic.BaseModel):
     post_title: str
     post_description: str
-    image: str
+    image_path: str
 
     class Config:
            from_attributes = True
@@ -45,5 +45,6 @@ class PostResponse(PostBase):
     
 
     class config:
+        orm_mode = True
         from_attributes = True
 

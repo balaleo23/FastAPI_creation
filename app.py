@@ -75,3 +75,14 @@ async def create_post(post_request: _schemas.PostRequest,
         return JSONResponse(status_code=500, content={"message": "Database error"})
    
         
+
+@app.get("/api/v1/get_posts", response_model=list[_schemas.PostResponse])
+async def get_posts(    
+        user: _schemas.UserRequest = _fastapi.Depends(_services.current_user),
+        db : _orm.Session = _fastapi.Depends(_services.get_db)):
+    try:
+        return await _services.get_posts_by_user(user=user, db=db)
+    except Exception as e:
+        print(f"Error in app : {str(e)}")
+        logging.error(f"Database error: {str(e)}")
+        return JSONResponse(status_code=500, content={"message": "Database error"})

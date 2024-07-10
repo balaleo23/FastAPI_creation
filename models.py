@@ -27,7 +27,7 @@ class PostModel (_database.Base):
     userid = _sqlalchemy.Column(_sqlalchemy.Integer, _sqlalchemy.ForeignKey("users.id"))
     post_title =_sqlalchemy.Column(_sqlalchemy.String , index= True)
     post_description = _sqlalchemy.Column(_sqlalchemy.String , index = True)
-    image = _sqlalchemy.column(_sqlalchemy.String )
+    image_path = _sqlalchemy.Column(_sqlalchemy.String, nullable=True)  # Ensure this is correctly defined
     created_at = _sqlalchemy.Column(_sqlalchemy.DateTime, default=datetime.datetime.now)
     user = _orm.relationship("UserModel", back_populates="posts")
 
