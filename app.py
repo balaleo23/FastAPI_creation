@@ -86,3 +86,53 @@ async def get_posts(
         print(f"Error in app : {str(e)}")
         logging.error(f"Database error: {str(e)}")
         return JSONResponse(status_code=500, content={"message": "Database error"})
+    
+
+@app.get("/api/v1/{post_id}/post", response_model=_schemas.PostResponse)
+async def get_post_details(post_id: int, db : _orm.Session = _fastapi.Depends(_services.get_db)):
+        db_posts = await _services.get_posts_details(post_id=post_id, db=db)
+        if db_posts is None:
+            raise _fastapi.HTTPException(status_code=404, detail="Post not found")
+        return db_posts
+    # except Exception as e:
+    #     print(f"Error in app : {str(e)}")
+    #     logging.error(f"Database error: {str(e)}")
+    #     return JSONResponse(status_code=500, content={"message": "Database error"})
+
+@app.get("/api/v1/allusers", response_model=_schemas.UserResponse)
+async def get_user_details(userid: int, db : _orm.Session = _fastapi.Depends(_services.get_db)):
+        dp_users = await _services.getUserDetails(userid=userid, db=db)
+        if dp_users is None:
+            raise _fastapi.HTTPException(status_code=404, detail="Users not found")
+        return dp_users
+
+
+
+@app.delete("/api/v1/{post_id}/post")
+async def delete_post(post_id: int, 
+                      db : _orm.Session = _fastapi.Depends(_services.get_db),
+                      user : _schemas.UserResponse = _fastapi.Depends(_services.current_user)):
+       delete_db_posts= await _services.delete_post(post_id=post_id, db=db)
+       return delete_db_posts
+
+
+@app.put("/api/v1/{post_id}/post", response_model=_schemas.PostResponse)
+async def update_post(post_id: int, post_request: _schemas.PostRequest, 
+                      db : _orm.Session = _fastapi.Depends(_services.get_db),
+                      user : _schemas.UserResponse = _fastapi.Depends(_services.current_user)):
+    try:
+        return await _services.update_post(post_id=post_id, post=post_request, db=db)
+    except Exception as e:
+        print(f"Error in app : {str(e)}")
+        logging.error(f"Database error: {str(e)}")
+
+
+@app.get("/api/v1/get_all_posts", response_model=list[_schemas.PostResponse])
+async def getallposts(db : _orm.Session = _fastapi.Depends(_services.get_db)):
+    try:
+        return await _services.get_all_posts(db=db)
+    except Exception as e:
+        print(f"Error in app : {str(e)}")
+        logging.error(f"Database error: {str(e)}")
+        return JSONResponse(status_code=500, content={"message": "Database error"})
+    

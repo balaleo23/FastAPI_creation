@@ -130,4 +130,59 @@ async def get_posts_by_user(user: _schemas.UserResponse, db: _orm.session):
         raise HTTPException(status_code=500, detail="Database error occurred while retriving the post.")
 
 
+async def get_posts_details(post_id: int, 
+                            db: _orm.session):
+    try :
+        db_post = db.query(_models.PostModel).filter_by(id=post_id).first()
+        if db_post is None: 
+            raise HTTPException(status_code=404, detail="Post not found")
 
+        return _schemas.PostResponse.from_orm(db_post)
+    except SQLAlchemyError as e:
+        print(f" error in services: {str(e)}")
+        db.rollback()
+
+
+
+async def getUserDetails(userid: int, 
+                            db: _orm.session):
+    try :
+        db_user = db.query(_models.UserModel).filter_by(id=userid).first()
+        if db_user is None: 
+            raise HTTPException(status_code=404, detail="Services: User not found")
+
+        return _schemas.UserResponse.from_orm(db_user)
+    except SQLAlchemyError as e:
+        print(f" error in services: {str(e)}")
+        db.rollback()
+
+
+async def delete_post(post_id: int, db: _orm.session):
+        delete_post = db.query(_models.PostModel).filter_by(id=post_id).delete()
+        print(delete_post)
+        if delete_post == 0:
+            raise HTTPException(status_code=404, detail="Post not found")
+        db.commit()
+        return 'post is deleted successfully'
+    
+
+async def update_post(post_id: int, post: _schemas.PostRequest, db: _orm.session):
+    try:
+        db_post = db.query(_models.PostModel).filter_by(id=post_id).first()
+        if db_post is None:
+            raise HTTPException(status_code=404, detail="Post not found")
+        db_post.post_title = post.post_title
+        db_post.post_description = post.post_description
+        db_post.image_path = post.image_path
+        db.commit()
+        return _schemas.PostResponse.from_orm(db_post)
+
+    except SQLAlchemyError as e:
+        print(f" error in services: {str(e)}")
+        db.rollback()   
+
+async def get_all_posts(db: _orm.session):
+    posts = db.query(_models.PostModel).all() 
+    if posts is None:
+        raise HTTPException(status_code=404, detail="Post not found")
+    return list(map(_schemas.PostResponse.from_orm, posts))
