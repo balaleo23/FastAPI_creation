@@ -1,0 +1,47 @@
+
+
+	FastAPI
+ 
+ step1: Install the necessary environment and set the proper path when installing while running the intrepreter try to use the correct environment path in vscode
+ step 2: create a database connection	
+		sqlalchemy
+		creating Engine
+		creating Session
+		Base (declarative Method)
+		
+		
+ step3: Creating the Models using ORM (tables from the python for db)
+		Model Will contain the Tablename "Users" same as db
+		Model will contain the Tablename "Posts" same as db
+		
+
+ step4: Creating Schemas
+		Implementing the Schemas using Pydantic Basemodel
+		I need some clarification why we use schemas in python fast api
+		
+		
+Step 4 : Creating Services
+	a.Creating_db
+	b. instantiating Db
+	c.create_token using JWT
+	d. Validating and Creating Users / Generating Hashed Password
+	
+step 5:
+ Importing all the necessary files into the app module
+ getting the end_point
+ 
+	
+		
+ 
+step 6 created the services to check the current user
+	a. used db
+	b used jwt_token decode and other things
+	c. It created the Payload to check the user
+
+
+Step 7 created the posts and checked the content for post using user id
+note : please check the parameter sent and the model with correct name
+		
+		
+
+
